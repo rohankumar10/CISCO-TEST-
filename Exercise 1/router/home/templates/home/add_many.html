@@ -1,0 +1,115 @@
+{% extends "home/base.html" %}
+{% load static %}
+{% block body %}
+    <div>
+        <form name="routerdata">
+            <table align="center" style="padding:20px; margin: 20px;">
+                <tr>
+                    <td><label>Host name</label></td>
+                    <td><input type="text" id="host_name_1"></td>
+                </tr>
+                <tr>
+                    <td><label>SAP ID</label></td>
+                    <td><input type="text" id="sap_id_1"></td>
+                </tr>
+                <tr>
+                    <td><label>Loopback ID</label></td>
+                    <td><input type="text" id="loopback_id_1"></td>
+                </tr>
+                <tr>
+                    <td><label>IPV4</label></td>
+                    <td><input type="text" id="ipv4_1"></td>
+                </tr>
+                <tr>
+                    <td><label>MAC Address</label></td>
+                    <td><input type="text" id="mac_address_1"></td>
+                </tr>
+                <tr>
+                    <div id="dynamic"></div>
+                </tr>
+                <tr>
+                    <td><input type="button" value="Save" onclick="parseForm()"/></td>
+                    <td><input type="button" value="Add More" onclick="addMany()"></td>
+                    <td><input type="button" value="Back" onclick="home()"/></td>
+                </tr>
+            </table>
+        </form>
+    </div>
+    <script type="text/javascript">
+        var i = 1;
+        function home() {
+            URL = 'http://127.0.0.1:8000/home/view_router/';
+            location.replace(URL);
+        }
+
+  function parseForm() {
+    var router_data = {};
+    var form = document.forms["routerdata"];
+    var elements = form.elements;
+    var option = {};
+    var j = 1;
+    while(j <= i) {
+      data = {}
+      data['host_name'] = elements['host_name_'+j].value.trim();
+      data['sap_id'] = elements['sap_id_'+j].value.trim();
+      data['loopback_id'] = elements['loopback_id_'+j].value.trim();
+      data['ipv4'] = elements['ipv4_'+j].value.trim();
+      data['mac_address'] = elements['mac_address_'+j].value.trim();
+      router_data['entry_no_'+j] = data
+      j++;
+    }
+    var payload = JSON.stringify(router_data);
+    $.ajax({
+      url: 'http://127.0.0.1:8000/home/add_many/',
+      method: "POST",
+      type: "POST",
+      dataType: "JSON",
+      data: payload,
+      contentType: "application/json",
+      success: function (data, status) {
+          location.href = "http://127.0.0.1:8000/home/view_router"
+      }, error: function (data, status) {
+        alert(data);
+      }
+    });
+  }
+
+          function increment() {
+            i += 1;
+          }
+
+    function createEntry(label, val) {
+        var tr = document.createElement("tr");
+        var td1 = document.createElement("td");
+        var td2 = document.createElement("td");
+        var que_label = document.createElement("label");
+        que_label.innerHTML = label;
+        var inp = document.createElement("INPUT");
+        inp.setAttribute("name", val+"_"+i);
+        td1.appendChild(que_label);
+        td2.appendChild(inp);
+        tr.appendChild(td1);
+        tr.appendChild(td2);
+        return tr;
+    }
+
+  function addMany(){
+      increment();
+      var div = document.createElement('div');
+      var host_name = createEntry('Host name', 'host_name');
+      var sap_id = createEntry('SAP ID', 'sap_id');
+      var loopback_id = createEntry('Loopback ID', 'loopback_id');
+      var ipv4 = createEntry('IPV4', 'ipv4');
+      var mac_address = createEntry('MAC Address', 'mac_address');
+
+      div.appendChild(host_name);
+      div.appendChild(sap_id);
+      div.appendChild(loopback_id);
+      div.appendChild(ipv4);
+      div.appendChild(mac_address);
+      document.getElementById("dynamic").appendChild(div);
+  }
+
+
+    </script>
+{% endblock %}
